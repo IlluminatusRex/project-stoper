@@ -1,29 +1,24 @@
 import React from 'react';
 import Button from '../Button/Button'
+import { useState, useEffect } from 'react';
 
-function Timer() {
-
-    let millisec = 0;
-    var interval;
-
-    function start () {
-        interval =  setInterval(myTimer, 20);
-    }
-    function pause () {
-        clearInterval(interval);
-    }
-    function reset () {
-        millisec = 0;
-        document.getElementById("timer").innerHTML = msToTime(millisec);
-    }
+const Timer = () => {
+    const [miliseconds, setSeconds] = useState(0);
+    const [isActive, setIsActive] = useState(false);
   
-    function myTimer() {
-      millisec = millisec + 20;
-      document.getElementById("timer").innerHTML = msToTime(millisec);
+    function reset() {
+      setSeconds(0);
+      setIsActive(false);
+    }
+    function start() {
+      setIsActive(true);
+    }
+    function stop() {
+      setIsActive(false);
     }
 
     function msToTime(duration) {
-      var milliseconds = Math.floor((duration % 1000)/10),
+      var milliseconds = Math.floor((duration % 1000)),
         seconds = Math.floor((duration / 1000) % 60),
         minutes = Math.floor((duration / (1000 * 60)) % 60),
         hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
@@ -35,15 +30,27 @@ function Timer() {
 
       return hours + " : " + minutes + " : " + seconds + " . " + milliseconds;
     }
+  
+    useEffect(() => {
+      let interval = null;
+      if (isActive) {
+        interval = setInterval(() => {
+          setSeconds(miliseconds => miliseconds + 25);
+        }, 25);
+      } else if (!isActive && miliseconds !== 0) {
+        clearInterval(interval);
+      }
+      return () => clearInterval(interval);
+    }, [isActive, miliseconds]);
 
   return (
     <div style={{textAlign: 'center'}}>
       <div style={{fontSize: '100px'}}>
-        <span id="timer">{msToTime(0)}</span>
+        <span id="timer">{msToTime(miliseconds)}</span>
         <p></p>
       </div>
       <Button onClick={start}>Start</Button>
-      <Button onClick={pause}>Stop</Button>
+      <Button onClick={stop}>Stop</Button>
       <Button onClick={reset}>Reset</Button>
     </div>
   );
